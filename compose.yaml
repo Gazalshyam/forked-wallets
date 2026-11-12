@@ -1,4 +1,4 @@
-name: forked-wallets
+name: share-subs
 
 x-app-env: &app-env
   DATABASE_URL: postgresql+psycopg://fw:fw@db:5432/fw
