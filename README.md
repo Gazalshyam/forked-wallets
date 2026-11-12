@@ -214,9 +214,53 @@ Run the scripts against a fresh/reset demo stack and consult their comments and 
 
 We will document the submitted test cases here, including scenario, setup/preconditions, steps, expected outcome, and observed result. This section will be expanded based on the cases supplied by the project team.
 
-| ID | Use case / test case | Preconditions | Expected result | Status |
-|---|---|---|---|---|
-| UC-01 | `[PLACEHOLDER]` | `[PLACEHOLDER]` | `[PLACEHOLDER]` | `[PLACEHOLDER]` |
+| UC-0N | Use case | TestCase | Preconditions | ExpectedResults | Status | 
+|---|---|---|---|---|---| 
+| UC-01 | Sign in | TC-01.1 Demo sign-in as Asha, Ben or Chloe | `DEMO_MODE=true`, stack running | Signed HttpOnly session cookie set; `/auth/me` returns the user; dashboard loads | Pass (curl) | 
+| UC-01 | Sign in | TC-01.2 Register and sign in with email and password | Email not yet registered | Password hashed with scrypt; 409 for a duplicate email; 422 for a password under 8 characters | Not run | 
+| UC-02 | Create a group with a subscription | TC-02.1 Owner creates a group with a $15 StreamFlix plan | Signed in | Creator is OWNER; first cycle opens with renewal 7 days out; COLLECT, CHECK and RENEW jobs scheduled | Pass (pytest, via the demo seed) | 
+| UC-03 | Invite and accept | TC-03.1 Owner invites by email; invitee accepts from the dashboard | Owner signed in; invitee has an account with that email | In-app INVITE item; after Accept the member is ACTIVE; untouched cycle re-split equally | Not run (steps in the "Create a group" walkthrough) | 
+| UC-04 | Split the subscription | TC-04.1 Equal split with leftover cents ($10.00 or $10.01 between 3) | Group with 3 members | 334 / 333 / 333 and 334 / 334 / 333 cents; leftover cents go to the lowest member IDs | Pass (pytest) | 
+| UC-04 | Split the subscription | TC-04.2 Custom split that does not sum to the price | Owner on the group page | Rejected (422); a split that sums exactly is saved | Pass (pytest, curl) | 
+| UC-05 | Pay my share | TC-05.1 Member pays $5 through an approval order | Cycle open, mock PayPal | Approval link, then capture COMPLETED, then a CONTRIBUTION row with order and capture IDs, labelled MOCK PAYPAL | Pass (smoke) | 
+| UC-05 | Pay my share | TC-05.2 Capture returns a status other than COMPLETED | Mock capture forced to return APPROVED | Attempt FAILED; no ledger row; nothing counted as collected | Pass (pytest) | 
+| UC-05 | Pay my share | TC-05.3 Same idempotency key written twice | Existing ledger row | Exactly one row | Pass (pytest) | 
+| UC-05 | Pay my share | TC-05.4 Real PayPal Sandbox approval and capture | US sandbox credentials in `.env`, `PAYMENT_PROVIDER=paypal` | Same as TC-05.1 with PAYPAL SANDBOX IDs | Not run | 
+| UC-06 | Auto-debit | TC-06.1 COLLECT charges a saved token | Member on auto-debit with a saved mock token | Saved-token charge COMPLETED; share paid with no approval step | Pass (smoke) | 
+| UC-06 | Auto-debit | TC-06.2 Forced failure falls back to approval | "Force next charge to fail" on | Attempt FAILED (SIMULATED, no PayPal call); "Pay my share" inbox item instead | Pass (smoke) | 
+| UC-06 | Auto-debit | TC-06.3 Real vault token charge | Sandbox credentials, `PAYPAL_VAULT_ENABLED=true` | Charge COMPLETED from PayPal before auto-debit is shown as working | Not run | 
+| UC-07 | Subscription cycle | TC-07.1 CHECK (D-1) with a shortfall | One share unpaid | Collections agent reminder with the shortfall to each member; mock template when the LLM is off (the one-per-day limit is in code but has no separate test) | Pass (smoke) | 
+| UC-07 | Subscription cycle | TC-07.2 RENEW when fully collected | All shares paid | SIMULATED StreamFlix SPEND; next cycle opened with new shares | Pass (pytest, smoke) | 
+| UC-07 | Subscription cycle | TC-07.3 RENEW when short | One share unpaid | Cycle and subscription PAUSED; nobody else's share raised; no SPEND | Pass (pytest) | 
+| UC-08 | Cover a missed share (E2) | TC-08.1 Chloe covers Ben at D-1 | Ben unpaid after CHECK | Ben's share settled from the cycle snapshot; next cycle Asha $5, Ben $10, Chloe $0, with notes; back to equal after that | Pass (pytest, smoke) | 
+| UC-08 | Cover a missed share (E2) | TC-08.2 Ben misses again in the very next cycle | Ben was covered last cycle | No cover offered (422); everyone told; RENEW pauses | Pass (pytest, smoke) | 
+| UC-08 | Cover a missed share (E2) | TC-08.3 Share paid while a cover order is pending | Cover order created, then Ben pays | Cover CANCELLED, not captured, no ledger row | Pass (pytest) | 
+| UC-08 | Cover a missed share (E2) | TC-08.4 Member tries to cover their own share | — | Rejected | Pass (pytest) | 
+| UC-09 | Leave a group and vote (E1) | TC-09.1 Unpaid member leaves; the others vote AGREE | Ben unpaid | Decision OPEN; COLLECT charges nobody; after all agree, shares become 750 / 750 and COLLECT is queued | Pass (pytest, smoke) | 
+| UC-09 | Leave a group and vote (E1) | TC-09.2 One PAUSE vote | Decision open | Subscription and cycle PAUSED; RENEW does nothing; owner can ask again with fresh votes | Pass (pytest) | 
+| UC-09 | Leave a group and vote (E1) | TC-09.3 Paid member leaves | Ben paid this cycle | Current cycle renews unchanged; new split from the next cycle, after consent | Pass (pytest) | 
+| UC-09 | Leave a group and vote (E1) | TC-09.4 Owner tries to leave; a leaver tries to vote | — | Both rejected | Pass (pytest) | 
+| UC-10 | Whose money is in the pot (E3) | TC-10.1 Per-member parts after top-ups, shares, a renewal and a task | Several contributions and spends | Parts add up exactly to the pot's available and reserved numbers; shown as a pie on the group page | Pass (pytest, smoke); pie not viewed in a browser | 
+| UC-10 | Whose money is in the pot (E3) | TC-10.2 A cover makes the debtor negative until repaid | Chloe covered Ben, renewal done | Ben −$5, Chloe +$5; both $0 after the repayment cycle | Pass (pytest) | 
+| UC-11 | Refund on leaving (E3) | TC-11.1 Member with a surplus leaves | Ben has $70 above this cycle's $5 share | $70 refunded against his own captures (newest first, never above a capture's amount); REFUND rows with capture and refund IDs; the $5 stays for the renewal | Pass (pytest, smoke) | 
+| UC-11 | Refund on leaving (E3) | TC-11.2 Member who owes money leaves | Ben's share was covered and not repaid | No refund and no charge; WRITE_OFF moves the $5 onto Chloe; everyone notified | Pass (pytest) | 
+| UC-11 | Refund on leaving (E3) | TC-11.3 Leave while a task uses your money | Task awaiting consent or running | Rejected (422) with the task number | Pass (pytest, smoke) | 
+| UC-11 | Refund on leaving (E3) | TC-11.4 Real PayPal capture refund | Sandbox credentials | Refund COMPLETED from PayPal before a REFUND row is written | Not run | 
+| UC-12 | Plan an AI task | TC-12.1 "Plan with AI" on the hotel prompt | Owner; LLM mock or real | City, nights, guests and rating validated with Pydantic; budget entered by the owner, never by the AI | Pass (smoke, mock LLM) | 
+| UC-12 | Plan an AI task | TC-12.2 Same with a real LLM (Groq) | `LLM_PROVIDER=groq`, key and model in `.env` | Plan source and agent reasons show the model label; template used on any LLM error | Reported by team | 
+| UC-13 | Sub-pot and consent (E4) | TC-13.1 Task for Asha and Ben only | Each member has $100 | Budget above their $200 rejected; after Ben agrees the fork is 50/50; Chloe's part untouched | Pass (pytest, smoke) | 
+| UC-13 | Sub-pot and consent (E4) | TC-13.2 One participant has less than an equal share | Asha $50, Ben $150, budget $200 | Fork Asha $50, Ben $150; the hotel price is split equally but capped at each person's fork | Pass (pytest) | 
+| UC-13 | Sub-pot and consent (E4) | TC-13.3 A participant declines | Task awaiting consent | Member dropped; task cancelled with nothing forked if the rest cannot cover the budget | Pass (pytest) | 
+| UC-13 | Sub-pot and consent (E4) | TC-13.4 Silence past the consent window | `CONSENT_TIMEOUT_SECONDS` elapsed, or owner clicks "end the wait" | Silent members OWNER_AUTHORIZED and notified; fork written once; race starts | Pass (pytest, smoke) | 
+| UC-14 | Fork and agent race | TC-14.1 Budget above what the pot has available | Pot short | Rejected before any fork | Pass (pytest, smoke) | 
+| UC-14 | Fork and agent race | TC-14.2 Two agents claim at the same moment | Task SEARCHING | Exactly one winner (atomic compare-and-set); the other is told the task is LOCKED | Pass (pytest) | 
+| UC-14 | Fork and agent race | TC-14.3 Full race, hotel confirms | Consent given | Three agents search; first valid one wins; mock card (synthetic last 4, limit = price, DEMO_HOTEL, single use, 10 min) issued | Pass (smoke) | 
+| UC-15 | Booking outcomes | TC-15.1 First hotel declines | Booking mode DECLINE_FIRST | Card closed; lock released; next valid candidate wins and books | Pass (smoke) | 
+| UC-15 | Booking outcomes | TC-15.2 Booking outcome UNKNOWN | Booking mode UNKNOWN | NEEDS_REVIEW; lock and reservation kept; no second card; owner "did not book" merges everything back | Pass (pytest, smoke) | 
+| UC-16 | Pay the hotel and merge back | TC-16.1 Confirmed booking | Price below budget | Payout to the demo hotel (MOCK PAYPAL in mock mode, SIMULATED if payouts are off); SPEND row; unused budget returns as MERGE_BACK split per participant | Pass (pytest, smoke) | 
+| UC-16 | Pay the hotel and merge back | TC-16.2 Real PayPal payout | Sandbox credentials, `PAYPAL_PAYOUTS_ENABLED=true` | Payout batch ID from PayPal on the SPEND row | Not run | 
+| UC-17 | Ledger and honest labels | TC-17.1 Ledger after the full demo | Moments 1 to 3 done | Every row labelled PAYPAL SANDBOX, MOCK PAYPAL or SIMULATED; available = collected − spent − refunded − reserved | Pass (pytest, smoke); ledger page not viewed in a browser | 
+| UC-18 | Web UI walkthrough | TC-18.1 Click through `docs/demo-runbook.md`, including Demos E1 to E4 | Fresh stack in mock mode | Every screen behaves as the runbook says | Not run by Claude (Vite build only) |
 
 ## Functional demo and video
 
