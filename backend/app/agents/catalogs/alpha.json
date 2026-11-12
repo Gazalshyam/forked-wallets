@@ -1,0 +1,57 @@
+{
+ "catalog": "alpha",
+ "display_name": "HotelHop (mock)",
+ "currency": "USD",
+ "note": "Mock inventory. Not real hotels.",
+ "hotels": [
+  {
+   "ref": "ALPHA-001",
+   "city": "Austin",
+   "name": "Congress Ave Inn",
+   "nightly_minor": 8900,
+   "rating": "4.2"
+  },
+  {
+   "ref": "ALPHA-002",
+   "city": "Austin",
+   "name": "Lady Bird Lodge",
+   "nightly_minor": 11200,
+   "rating": "4.6"
+  },
+  {
+   "ref": "ALPHA-003",
+   "city": "Austin",
+   "name": "South Lamar Suites",
+   "nightly_minor": 7900,
+   "rating": "3.8"
+  },
+  {
+   "ref": "ALPHA-004",
+   "city": "Seattle",
+   "name": "Pike Place Rooms",
+   "nightly_minor": 13900,
+   "rating": "4.4"
+  },
+  {
+   "ref": "ALPHA-005",
+   "city": "New York",
+   "name": "Hudson Yards Pod",
+   "nightly_minor": 15900,
+   "rating": "4.1"
+  },
+  {
+   "ref": "ALPHA-006",
+   "city": "Chicago",
+   "name": "Loop Lofts",
+   "nightly_minor": 10900,
+   "rating": "4.3"
+  },
+  {
+   "ref": "ALPHA-007",
+   "city": "San Francisco",
+   "name": "Mission Bay Hotel",
+   "nightly_minor": 17900,
+   "rating": "4.2"
+  }
+ ]
+}

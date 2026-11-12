@@ -1,0 +1,57 @@
+{
+ "catalog": "beta",
+ "display_name": "StayScout (mock)",
+ "currency": "USD",
+ "note": "Mock inventory. Not real hotels.",
+ "hotels": [
+  {
+   "ref": "BETA-001",
+   "city": "Austin",
+   "name": "Barton Springs Hotel",
+   "nightly_minor": 9500,
+   "rating": "4.5"
+  },
+  {
+   "ref": "BETA-002",
+   "city": "Austin",
+   "name": "East Sixth Stay",
+   "nightly_minor": 7400,
+   "rating": "4.0"
+  },
+  {
+   "ref": "BETA-003",
+   "city": "Austin",
+   "name": "Capitol View",
+   "nightly_minor": 14000,
+   "rating": "4.7"
+  },
+  {
+   "ref": "BETA-004",
+   "city": "Seattle",
+   "name": "Capitol Hill Guesthouse",
+   "nightly_minor": 11900,
+   "rating": "4.2"
+  },
+  {
+   "ref": "BETA-005",
+   "city": "New York",
+   "name": "Brooklyn Bridge Inn",
+   "nightly_minor": 18900,
+   "rating": "4.6"
+  },
+  {
+   "ref": "BETA-006",
+   "city": "Chicago",
+   "name": "River North Hotel",
+   "nightly_minor": 12900,
+   "rating": "4.5"
+  },
+  {
+   "ref": "BETA-007",
+   "city": "San Francisco",
+   "name": "Nob Hill Rooms",
+   "nightly_minor": 15500,
+   "rating": "4.0"
+  }
+ ]
+}

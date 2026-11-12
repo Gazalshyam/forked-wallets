@@ -1,0 +1,57 @@
+{
+ "catalog": "gamma",
+ "display_name": "RoomRadar (mock)",
+ "currency": "USD",
+ "note": "Mock inventory. Not real hotels.",
+ "hotels": [
+  {
+   "ref": "GAMMA-001",
+   "city": "Austin",
+   "name": "Zilker Park Rooms",
+   "nightly_minor": 9200,
+   "rating": "4.3"
+  },
+  {
+   "ref": "GAMMA-002",
+   "city": "Austin",
+   "name": "Rainey Street House",
+   "nightly_minor": 9900,
+   "rating": "4.4"
+  },
+  {
+   "ref": "GAMMA-003",
+   "city": "Austin",
+   "name": "Domain Budget Inn",
+   "nightly_minor": 6500,
+   "rating": "3.5"
+  },
+  {
+   "ref": "GAMMA-004",
+   "city": "Seattle",
+   "name": "Fremont Hostel Plus",
+   "nightly_minor": 8900,
+   "rating": "3.9"
+  },
+  {
+   "ref": "GAMMA-005",
+   "city": "New York",
+   "name": "Midtown Micro Hotel",
+   "nightly_minor": 14900,
+   "rating": "4.0"
+  },
+  {
+   "ref": "GAMMA-006",
+   "city": "Chicago",
+   "name": "Wicker Park Inn",
+   "nightly_minor": 9900,
+   "rating": "4.1"
+  },
+  {
+   "ref": "GAMMA-007",
+   "city": "San Francisco",
+   "name": "Haight Street Hotel",
+   "nightly_minor": 13500,
+   "rating": "4.3"
+  }
+ ]
+}

@@ -1,0 +1,50 @@
+name: forked-wallets
+
+x-app-env: &app-env
+  DATABASE_URL: postgresql+psycopg://fw:fw@db:5432/fw
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fw
+      POSTGRES_PASSWORD: fw
+      POSTGRES_DB: fw
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fw -d fw"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"]
+      interval: 3s
+      timeout: 4s
+      retries: 40
+
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  dbdata:
